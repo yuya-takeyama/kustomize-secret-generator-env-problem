@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+require 'shellwords'
+require 'yaml'
+require 'base64'
+
+dir = ARGV[0]
+unless dir && File.directory?(dir)
+  warn "Usage: #{$0} <kustomize overlay directory>"
+  exit 1
+end
+
+# Load the JSON to store in SecretMap
+generate_json_cmd = File.join(File.dirname(__FILE__), 'generate_json')
+expected = `#{generate_json_cmd}`
+
+# Run `kustomize build` with an environment variable `JSON`
+secret_yaml = `JSON=$(#{Shellwords.escape(generate_json_cmd)}) kustomize build #{Shellwords.escape(dir)}`
+unless $?.success?
+  warn "kustomize error"
+  exit 1
+end
+
+# Parse the data in the SecretMap
+begin
+  secret = YAML.load(secret_yaml).fetch('data').fetch('SECRET_JSON')
+rescue KeyError => e
+  warn "failed to get secret data: #{e.message}"
+  exit 1
+end
+
+actual = Base64.decode64(secret)
+
+puts "kustomization.yaml:"
+puts open(File.join(dir, 'kustomization.yaml')).read
+puts
+puts "Expected:"
+puts expected.inspect
+puts
+puts "Actual:"
+puts actual.inspect
+puts
+
+# Compare the input and the output
+if expected == actual
+  puts "OK"
+else
+  puts "NG"
+  exit 1
+end

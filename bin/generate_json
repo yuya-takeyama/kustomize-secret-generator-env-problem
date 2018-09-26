@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+print JSON.pretty_generate({
+  "FOO" => "FOO    BAR\nBAZ"
+})
