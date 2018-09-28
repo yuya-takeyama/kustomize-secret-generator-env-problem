@@ -16,7 +16,8 @@ generate_json_cmd = File.join(bin_dir, 'generate_json')
 expected = `#{generate_json_cmd}`
 
 # Run `kustomize build` with an environment variable `JSON`
-secret_yaml = `PATH=#{Shellwords.escape(bin_dir + ":" + ENV['PATH'])} JSON=$(#{Shellwords.escape(generate_json_cmd)}) kustomize build #{Shellwords.escape(dir)}`
+path_env = "PATH=#{Shellwords.escape(bin_dir + ":" + ENV['PATH'])}"
+secret_yaml = `#{path_env} JSON=$(#{Shellwords.escape(generate_json_cmd)}) kustomize build #{Shellwords.escape(dir)}`
 unless $?.success?
   warn "kustomize error"
   exit 1
@@ -42,8 +43,16 @@ puts "Actual:"
 puts actual.inspect
 puts
 
+# Check exit status
+secret_yaml = `#{path_env} kustomize build #{Shellwords.escape(dir)} 2> /dev/null`
+exit_status = $?.exitstatus
+
+puts "With no environment variable, exit with:"
+puts exit_status
+puts
+
 # Compare the input and the output
-if expected == actual
+if expected == actual && exit_status != 0
   puts "OK"
 else
   puts "NG"
