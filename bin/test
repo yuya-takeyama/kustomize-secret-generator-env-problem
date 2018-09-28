@@ -11,11 +11,12 @@ unless dir && File.directory?(dir)
 end
 
 # Load the JSON to store in SecretMap
-generate_json_cmd = File.join(File.dirname(__FILE__), 'generate_json')
+bin_dir = File.dirname(__FILE__)
+generate_json_cmd = File.join(bin_dir, 'generate_json')
 expected = `#{generate_json_cmd}`
 
 # Run `kustomize build` with an environment variable `JSON`
-secret_yaml = `JSON=$(#{Shellwords.escape(generate_json_cmd)}) kustomize build #{Shellwords.escape(dir)}`
+secret_yaml = `PATH=#{Shellwords.escape(bin_dir + ":" + ENV['PATH'])} JSON=$(#{Shellwords.escape(generate_json_cmd)}) kustomize build #{Shellwords.escape(dir)}`
 unless $?.success?
   warn "kustomize error"
   exit 1
