@@ -5,5 +5,6 @@ RUN apk --update add bash curl && \
   chmod +x /usr/local/bin/kustomize
 COPY . /work
 WORKDIR /work
+ENV PATH "/work/bin:$PATH"
 
 CMD ["bash"]
