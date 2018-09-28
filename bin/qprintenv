@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# NOTE:
+# * this command should exit with 1 when environment value is not set
+# * this command shouldn't add newline at the end (original `printenv` does it)
+# * this command should show environemnt value as is. (e.g. shouldn't replace \n with newline code`) `echo` command does it.
+
+VAR=$(printenv $1)
+if [[ $? == 0 ]]; then
+  printf "%s" "${VAR}"
+else
+  exit 1
+fi
