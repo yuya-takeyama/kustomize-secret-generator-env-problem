@@ -1,4 +1,4 @@
 secretGenerator:
 - name: foo-secret
   commands:
-    SECRET_JSON: bash -euc 'qprintenv JSON'
+    SECRET_JSON: qprintenv JSON
